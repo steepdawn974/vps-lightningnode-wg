@@ -66,15 +66,74 @@ and change/set
 bantime  = 60m
 
 maxretry = 3
-
 ```
 
 Reload fail2ban
 `sudo systemctl reload fail2ban.service`
 
 Check status
-`sudo systemctl status fail2ban.service`
+```
+sudo systemctl status fail2ban.service
+```
 
 If there is an error `ERROR   Failed during configuration: Have not found any log file for sshd jail` then you need to manually create the sshd log file, which by default is in `/var/log/auth.log`
-`sudo touch /var/log/auth.log` 
+
+```sudo touch /var/log/auth.log```
+
+
+4. Log out from the server, add the ssh login conncetion to your local PCs ssh/config for convenience
+```
+echo "Host  wgserver
+Hostname <<your_vps_servers_public_ip_Address>>
+User  wg" >> .ssh/config
+```
+
+Test is by logging in
+`ssh wgserver`
+
+
+# Install and Confiugure WQireguard on Server and Client
+
+- Install wireguard on both client and server machines
+
+`sudo apt install wireguard`
+
+On SERVER edit control file and enable ipv4 forwarding
+```
+sudo nano /etc/sysctl.conf
+
+#comment
+net.ipv4.ip_forward=1
+
+#apply changes
+sudo sysctl -p
+sudo sysctl --system
+```
+
+On BOTH client and server generate a public private keypair
+
+```
+#become root
+sudo -i
+cd /etc/wireguard
+wg genkey | tee privatekey | wg pubkey > publickey
+chmod 400 privatekey
+```
+
+On SERVER private key
+
+```
+[Interface]
+PrivateKey = 
+Address = 10.0.0.1
+ListenPort = 51820
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat4 -A POSTROUTING -o ens3 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat4 -D POSTROUTING -o ens3 -j MASQUERADE
+
+[Peer]
+PublicKey = 
+AllowedIPs = 10.0.0.2/32
+
+```
+
 
