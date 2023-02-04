@@ -27,7 +27,7 @@ chmod 700 /home/wg/.ssh/
 chown wg:wg /home/wg/.ssh/
 ```
 
-3, Harden server 
+3. Harden SERVER 
 
 - Edit sshd_config `nano /etc/ssh/sshd_config 
 - Uncomment and change these settings
@@ -92,13 +92,14 @@ Test is by logging in
 `ssh wgserver`
 
 
-# Install and Confiugure WQireguard on Server and Client
+# Install and Configure Wireguard on CLIENT and SERVER
 
-- Install wireguard on both client and server machines
+- Install wireguard on both client and server
 
 `sudo apt install wireguard`
 
-On SERVER edit control file and enable ipv4 forwarding
+### On SERVER 
+edit control file and enable ipv4 forwarding
 ```
 sudo nano /etc/sysctl.conf
 
@@ -110,7 +111,9 @@ sudo sysctl -p
 sudo sysctl --system
 ```
 
-On BOTH client and server generate a public private keypair
+### On BOTH client and server
+
+generate a public private keypair each
 
 ```
 #become root
@@ -120,8 +123,9 @@ wg genkey | tee privatekey | wg pubkey > publickey
 chmod 400 privatekey
 ```
 
-On SERVER, create a config file `wg0.conf`
+### On the SERVER
 
+create a config file `wg0.conf`
 
 ```
 cat privatekey  #copy the result
@@ -144,13 +148,17 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
 PublicKey = <publickey of the client>
 AllowedIPs = 10.0.0.2/32
 
-```
 
-On the SERVER, allow incming udp port `51820`
+```
+Harden file permissions
+`chmod 600 wg0.conf`
+
+
+Allow incoming udp port `51820`
 `ufw allow 51820/udp`
 
 
-On the CLIENT 
+### On the CLIENT 
 `nano wg0.conf`
  
 ```
@@ -167,8 +175,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25
 ```
 
-On BOTH client and server, harden the file permissions
-
+Harden file permissions
 `chmod 600 wg0.conf`
 
 # Start up Wireguard on CLIENT and SERVER, and test connection
