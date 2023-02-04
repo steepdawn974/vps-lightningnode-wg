@@ -120,20 +120,67 @@ wg genkey | tee privatekey | wg pubkey > publickey
 chmod 400 privatekey
 ```
 
-On SERVER private key
+On SERVER, create a config file `wg0.conf`
+
+
+```
+cat privatekey  #copy the result
+
+#create a conf file
+nano wg0.conf`
+```
+
+Add this template, and replace `ens2`with the name of your network device (use: `ip a` to find it) 
 
 ```
 [Interface]
-PrivateKey = 
+PrivateKey = <privatekey of the server> 
 Address = 10.0.0.1
 ListenPort = 51820
-PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat4 -A POSTROUTING -o ens3 -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat4 -D POSTROUTING -o ens3 -j MASQUERADE
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o ens3 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o ens3 -j MASQUERADE
 
 [Peer]
-PublicKey = 
+PublicKey = <publickey of the client>
 AllowedIPs = 10.0.0.2/32
 
 ```
 
+On the SERVER, allow incming udp port `51820`
+`ufw allow 51820/udp`
 
+
+On the CLIENT 
+`nano wg0.conf`
+ 
+```
+[Interface]
+PrivateKey = <privatekey of the client> 
+Address = 10.0.0.2   
+DNS = 1.1.1.1 #Cloudflare DNS server. Could be any public DNS server, eg. Google 8.8.8.8
+
+
+[Peer]
+PublicKey = < publickey of the server>
+Endpoint = <external public IP of the server>:51820
+AllowedIPs = 0.0.0.0/0, ::/0
+PersistentKeepalive = 25
+```
+
+On BOTH client and server, harden the file permissions
+
+`chmod 600 wg0.conf`
+
+# Run Wireguard
+
+- On the SERVER
+`wg-quick up wg0`
+
+
+- On the Client 
+`wg-quick up wg0`
+
+then test the Client'd public IP
+`curl 'https://checkip.dedyn.io'` 
+
+this should resolve into the public IP of the SERVER!!
