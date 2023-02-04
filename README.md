@@ -127,10 +127,10 @@ On SERVER, create a config file `wg0.conf`
 cat privatekey  #copy the result
 
 #create a conf file
-nano wg0.conf`
+nano wg0.conf
 ```
 
-Add this template, and replace `ens2`with the name of your network device (use: `ip a` to find it) 
+Add this template, and replace `ens3`with the name of your network device (use: `ip a` to find it) 
 
 ```
 [Interface]
@@ -171,7 +171,7 @@ On BOTH client and server, harden the file permissions
 
 `chmod 600 wg0.conf`
 
-# Run Wireguard
+# Start up Wireguard on CLIENT and SERVER, and test connection
 
 - On the SERVER
 `wg-quick up wg0`
@@ -184,3 +184,18 @@ then test the Client'd public IP
 `curl 'https://checkip.dedyn.io'` 
 
 this should resolve into the public IP of the SERVER!!
+
+
+# Enable wireguard at startup
+
+On BOTH the CLIENT and SERVER
+```
+#shut down the service wg0
+wg-quick down wg0
+
+#then add it to the system startup 
+systemctl enable --now wg-quick@wg0.service
+
+#check the status
+systemctl status wg-quick@wg0.service #should not display errors
+``` 
