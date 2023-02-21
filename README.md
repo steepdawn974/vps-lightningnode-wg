@@ -139,14 +139,14 @@ Add this template, and replace `ens3`with the name of your network device (use: 
 ```
 [Interface]
 PrivateKey = <privatekey of the server> 
-Address = 10.0.0.1
+Address = 10.9.9.1
 ListenPort = 51820
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o ens3 -j MASQUERADE
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o ens3 -j MASQUERADE
 
 [Peer]
 PublicKey = <publickey of the client>
-AllowedIPs = 10.0.0.2/32
+AllowedIPs = 10.9.9.2/32
 
 
 ```
@@ -164,7 +164,7 @@ Allow incoming udp port `51820`
 ```
 [Interface]
 PrivateKey = <privatekey of the client> 
-Address = 10.0.0.2   
+Address = 10.9.9.2   
 DNS = 1.1.1.1 #Cloudflare DNS server. Could be any public DNS server, eg. Google 8.8.8.8
 
 
