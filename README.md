@@ -207,9 +207,11 @@ systemctl enable --now wg-quick@wg0.service
 systemctl status wg-quick@wg0.service #should not display errors
 ```
 
-# On CLN node
+# Configure CLN hybrid (TOr+Clearnet) mode
 
 `sudo nano /home/bitcoin/.lightning/config`
+
+Enable clearnet, and set to the public IP of your VPS
 
 ```
 # Tor settings
