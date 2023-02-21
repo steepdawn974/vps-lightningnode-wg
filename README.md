@@ -205,4 +205,20 @@ systemctl enable --now wg-quick@wg0.service
 
 #check the status
 systemctl status wg-quick@wg0.service #should not display errors
-``` 
+```
+
+# On CLN node
+
+`sudo nano /home/bitcoin/.lightning/config`
+
+```
+# Tor settings
+proxy=127.0.0.1:9050
+bind-addr=127.0.0.1:9736
+addr=statictor:127.0.0.1:9051/torport=9736
+always-use-proxy=false  # change 'true' to 'false'
+
+# VPN
+bind-addr=0.0.0.0:51820
+announce-addr=<<your_vps_servers_public_ip_Address>>:51820
+```
